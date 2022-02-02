@@ -18,6 +18,7 @@ public class MainManager : MonoBehaviour
     private int m_Points;
     private int highScore;
     private string name;
+    public static MainManager Instance;
 
     private bool m_GameOver = false;
 
@@ -25,6 +26,8 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        name = PlayerPrefs.GetString("name");
+        Instance = this;
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -44,6 +47,11 @@ public class MainManager : MonoBehaviour
     private void Awake()
     {
         LoadData();
+        GameObject.Find("Best Score").GetComponent<Text>().text = "Best Score: " + highScore + " " + "Name: " + name;
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void Update()
@@ -63,9 +71,11 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
+            SaveData();
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                GameObject.Find("Best Score").GetComponent<Text>().text = "Best Score: " + highScore + " " + "Name: " + name;
             }
         }
     }
@@ -78,17 +88,16 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
-        SaveData();
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
 
     public void SaveData()
     {
-        PlayerPrefs.SetString("name", "");
-        if (m_Points > highScore)
+        PlayerPrefs.SetString("name", name);
+        if (highScore < m_Points)
         {
-            PlayerPrefs.SetInt("highscore", highScore);
+            PlayerPrefs.SetInt("highscore", m_Points);
         }
     }
 
